@@ -2,6 +2,7 @@ package daysteps
 
 import (
 	"fmt"
+	"log"
 	"strconv"
 	"strings"
 	"time"
@@ -18,17 +19,25 @@ const (
 
 func parsePackage(data string) (int, time.Duration, error) {
 	// TODO: реализовать функцию
-	v := strings.Split(data, ",")
-	if len(v) != 2 {
-		return 0, 0, nil
+	v := strings.Split(data, ",") // Из строки делаем слайс строк
+	if len(v) != 2 {              // Проверяем слайс на нужное нам количество элементов
+		return 0, 0, fmt.Errorf("не верное количество введенных данных")
 	}
-	steps, err := strconv.Atoi(v[0])
-	if err != nil || steps <= 0 {
-		return 0, 0, err
+	steps, err := strconv.Atoi(v[0]) // Преобразовываем строку в число
+	if err != nil {                  // Проверяем на наличие ошибок при преобразовании строки в число
+		return 0, 0, fmt.Errorf("не верный тип количества шагов")
 	}
-	time, err := time.ParseDuration(v[1])
-	if err != nil {
-		return 0, 0, err
+	if steps <= 0 { // Проверяем количество шагов на положительность значения
+		return 0, 0, fmt.Errorf("количество шагов должно быть больше 0")
+	}
+	time, err := time.ParseDuration(v[1]) // Преобразовываем строку во время
+	if err != nil {                       //Проверяем на наличие ошибок при преобразовании
+		log.Println(err)
+		return 0, 0, fmt.Errorf("не верный тип времени")
+	}
+	if time <= 0 {
+		log.Println(err)
+		return 0, 0, fmt.Errorf("отрицательное значение времени")
 	}
 	return steps, time, nil
 }
@@ -37,11 +46,16 @@ func DayActionInfo(data string, weight, height float64) string {
 	// TODO: реализовать функцию
 	steps, time, err := parsePackage(data)
 	if err != nil {
-		fmt.Println(err)
-		return " "
+		log.Println("некорректный формат", err)
+		return ""
 	}
 	if steps <= 0 {
-		return " "
+		log.Println("количество шагов должно быть больше 0", err)
+		return ""
+	}
+	if time <= 0 {
+		log.Println("не может быть отрицательного времени", err)
+		return ""
 	}
 	distanceM := float64(steps) * stepLength
 	distanceKm := distanceM / mInKm
